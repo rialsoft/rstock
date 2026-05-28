@@ -10,17 +10,20 @@ jobs:
   build:
     name: Build ${{ matrix.platform }}
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     strategy:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-22.04
             platform: linux/amd64
             output: rstock-linux-amd64
           - os: windows-latest
             platform: windows/amd64
             output: rstock-windows-amd64.exe
-          - os: macos-latest
+          - os: macos-13
             platform: darwin/amd64
             output: rstock-darwin-amd64
           - os: macos-latest
@@ -60,7 +63,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y \
             libgtk-3-dev \
-            libwebkit2gtk-4.1-dev \
+            libwebkit2gtk-4.0-dev \
             libayatana-appindicator3-dev \
             librsvg2-dev
 
@@ -73,17 +76,22 @@ jobs:
         run: npm run build
 
       - name: Build Wails app (${{ matrix.platform }})
+        if: runner.os != 'Windows'
+        run: |
+          CGO_ENABLED=1 wails build \
+            -platform ${{ matrix.platform }} \
+            -o ${{ matrix.output }} \
+            -clean
+
+      - name: Build Wails app (${{ matrix.platform }})
+        if: runner.os == 'Windows'
         run: |
           CGO_ENABLED=1 wails build \
             -platform ${{ matrix.platform }} \
             -o ${{ matrix.output }} \
             -webview2 embed \
             -nsis \
-            -clean 2>&1 || true
-          # Fallback: explicit go build if wails build fails on macos/arm64
-          if [ ! -f "build/bin/${{ matrix.output }}" ]; then
-            GOARCH=arm64 CGO_ENABLED=1 go build -o "build/bin/${{ matrix.output }}" .
-          fi
+            -clean
 
       - name: Verify binary exists
         run: ls -lh build/bin/${{ matrix.output }}
