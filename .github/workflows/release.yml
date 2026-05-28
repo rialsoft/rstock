@@ -95,18 +95,31 @@ jobs:
 
       - name: Verify binary exists
         run: |
-          echo "Searching for binary..."
-          find build/bin -type f -name 'rstock-*' -o -type d -name 'rstock-*' 2>/dev/null || true
-          # Flatten: if .app bundle on macOS, copy binary out
-          if [ -d "build/bin/${{ matrix.output }}.app" ]; then
-            cp -r "build/bin/${{ matrix.output }}.app" .
-            echo "macOS .app bundle found"
-          elif [ -f "build/bin/${{ matrix.output }}" ]; then
+          echo "Searching for build output..."
+          ls -la build/bin/ 2>/dev/null || true
+          # macOS: Wails produces rstock.app regardless of -o flag
+          if [ -d "build/bin/rstock.app" ]; then
+            mv "build/bin/rstock.app" "build/bin/${{ matrix.output }}.app"
+            echo "Renamed rstock.app → ${{ matrix.output }}.app"
+          fi
+          if [ -f "build/bin/${{ matrix.output }}" ]; then
             echo "Binary found: build/bin/${{ matrix.output }}"
+          elif [ -d "build/bin/${{ matrix.output }}.app" ]; then
+            echo "Bundle found: build/bin/${{ matrix.output }}.app"
           else
-            echo "ERROR: No binary or bundle found"
-            find build/bin -maxdepth 2 -ls
+            echo "ERROR: No binary or bundle found at expected path"
+            find build/bin -maxdepth 3 -ls 2>/dev/null
             exit 1
+          fi
+
+      - name: Zip macOS bundle
+        if: runner.os == 'macOS'
+        run: |
+          if [ -d "build/bin/${{ matrix.output }}.app" ]; then
+            cd build/bin
+            zip -r "${{ matrix.output }}.app.zip" "${{ matrix.output }}.app"
+            cd ../..
+            echo "Created build/bin/${{ matrix.output }}.app.zip"
           fi
 
       - name: Upload build artifact
@@ -115,7 +128,8 @@ jobs:
           name: ${{ matrix.output }}
           path: |
             build/bin/${{ matrix.output }}
-            ${{ matrix.output }}.app/**
+            build/bin/${{ matrix.output }}.app
+            build/bin/${{ matrix.output }}.app.zip
           retention-days: 7
 
   release:
@@ -143,15 +157,8 @@ jobs:
       - name: Flatten artifact directory
         run: |
           mkdir -p release
-          # Copy flat binaries
-          find release-assets -type f -name 'rstock-*' ! -path '*/.app/*' -exec cp {} release/ \;
-          # Zip .app bundles for macOS
-          for appdir in release-assets/*/*.app; do
-            if [ -d "$appdir" ]; then
-              name=$(basename "$appdir" .app)
-              (cd "$(dirname "$appdir")" && zip -r "$GITHUB_WORKSPACE/release/${name}.app.zip" "$(basename "$appdir")")
-            fi
-          done
+          find release-assets -type f \( -name 'rstock' -o -name 'rstock-*' -o -name '*.zip' \) -exec cp {} release/ \;
+          echo "Release assets:"
           ls -lh release/
 
       - name: Extract changelog for this version
