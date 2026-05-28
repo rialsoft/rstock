@@ -8,7 +8,10 @@ export const useMarketStore = defineStore('market', {
     async loadExchanges() {
       try {
         this.exchanges = await GetExchanges()
-        if (this.exchanges.length && !this.activeExchange) this.setExchange(this.exchanges[0])
+        if (!this.exchanges.length) return
+        const saved = localStorage.getItem('rstock:exchange')
+        const fallback = saved ? this.exchanges.find(e => e.id === Number(saved)) : null
+        this.setExchange(fallback || this.exchanges[0])
       } catch(e) { console.error(e) }
     },
     setExchange(ex) { this.activeExchange = ex; localStorage.setItem('rstock:exchange', String(ex.id)) },

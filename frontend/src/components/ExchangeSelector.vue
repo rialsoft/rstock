@@ -8,8 +8,7 @@ import { ref, watch } from 'vue'
 import { useMarketStore } from '../stores/market'
 import { useWatchlistStore } from '../stores/watchlist'
 const market = useMarketStore(); const watchlist = useWatchlistStore(); const selected = ref(0)
-watch(() => market.activeExchange, (ex) => { if (ex && selected.value !== ex.id) selected.value = ex.id }, { immediate: true })
-watch(() => market.exchanges, (exs) => { if (!selected.value && exs.length) { const saved = localStorage.getItem('rstock:exchange'); selected.value = saved ? Number(saved) : exs[0].id } }, { immediate: true })
+watch(() => market.activeExchange, (ex) => { if (ex) selected.value = ex.id }, { immediate: true })
 function onChange() { const ex = market.exchanges.find(e => e.id === selected.value); if (ex) { market.setExchange(ex); watchlist.fetchWatchlist(ex.id) } }
 </script>
 <style scoped>

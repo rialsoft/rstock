@@ -4,11 +4,12 @@
   <add-stock-dialog :visible="showAdd" @close="showAdd = false" @added="onAdded" />
 </template>
 <script setup>
-import { ref, onMounted } from 'vue'; import WatchlistTable from '../components/WatchlistTable.vue'; import StockChart from '../components/StockChart.vue'; import AddStockDialog from '../components/AddStockDialog.vue'
+import { ref, onMounted, watch } from 'vue'; import WatchlistTable from '../components/WatchlistTable.vue'; import StockChart from '../components/StockChart.vue'; import AddStockDialog from '../components/AddStockDialog.vue'
 import { useWatchlistStore } from '../stores/watchlist'; import { useChartStore } from '../stores/chart'; import { useMarketStore } from '../stores/market'
 const watchlist = useWatchlistStore(); const chart = useChartStore(); const market = useMarketStore(); const showAdd = ref(false)
 watchlist.initEvents()
 onMounted(async () => { if (market.activeExchangeId) await watchlist.fetchWatchlist(market.activeExchangeId) })
+watch(() => market.activeExchangeId, async (id) => { if (id) await watchlist.fetchWatchlist(id) })
 function onSelect(swq) { chart.selectStock(swq) }
 async function onRemove(id) { if (!id) return; await watchlist.removeStock(id); if (chart.selectedStock?.stock?.id === id) chart.selectStock(null) }
 async function onAdded() { await watchlist.fetchWatchlist(market.activeExchangeId) }

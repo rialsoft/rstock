@@ -9,7 +9,7 @@ Inspired by [JStock](https://github.com/yccheok/jstock).
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
 
 <div align="center">
-<img src="assets/banner.webp" alt="rstock" width="512">
+<img src="assets/banner.webp" alt="rstock" width="100%">
 </div>
 
 ## Features
