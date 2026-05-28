@@ -1,6 +1,6 @@
 <template>
   <select v-model="selected" @change="onChange" class="exch-select">
-    <option v-for="ex in market.exchanges" :key="ex.id" :value="ex.id">{{ ex.code }}</option>
+    <option v-for="ex in market.exchanges" :key="ex.id" :value="ex.id">{{ ex.code }} ({{ ex.country }})</option>
   </select>
 </template>
 <script setup>
