@@ -94,13 +94,28 @@ jobs:
             -clean
 
       - name: Verify binary exists
-        run: ls -lh build/bin/${{ matrix.output }}
+        run: |
+          echo "Searching for binary..."
+          find build/bin -type f -name 'rstock-*' -o -type d -name 'rstock-*' 2>/dev/null || true
+          # Flatten: if .app bundle on macOS, copy binary out
+          if [ -d "build/bin/${{ matrix.output }}.app" ]; then
+            cp -r "build/bin/${{ matrix.output }}.app" .
+            echo "macOS .app bundle found"
+          elif [ -f "build/bin/${{ matrix.output }}" ]; then
+            echo "Binary found: build/bin/${{ matrix.output }}"
+          else
+            echo "ERROR: No binary or bundle found"
+            find build/bin -maxdepth 2 -ls
+            exit 1
+          fi
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.output }}
-          path: build/bin/${{ matrix.output }}
+          path: |
+            build/bin/${{ matrix.output }}
+            ${{ matrix.output }}.app/**
           retention-days: 7
 
   release:
@@ -128,7 +143,15 @@ jobs:
       - name: Flatten artifact directory
         run: |
           mkdir -p release
-          find release-assets -type f -name 'rstock-*' -exec cp {} release/ \;
+          # Copy flat binaries
+          find release-assets -type f -name 'rstock-*' ! -path '*/.app/*' -exec cp {} release/ \;
+          # Zip .app bundles for macOS
+          for appdir in release-assets/*/*.app; do
+            if [ -d "$appdir" ]; then
+              name=$(basename "$appdir" .app)
+              (cd "$(dirname "$appdir")" && zip -r "$GITHUB_WORKSPACE/release/${name}.app.zip" "$(basename "$appdir")")
+            fi
+          done
           ls -lh release/
 
       - name: Extract changelog for this version
@@ -158,8 +181,8 @@ jobs:
           |----------|------|
           | Linux (amd64) | `rstock-linux-amd64` |
           | Windows (amd64) | `rstock-windows-amd64.exe` |
-          | macOS (Intel) | `rstock-darwin-amd64` |
-          | macOS (Apple Silicon) | `rstock-darwin-arm64` |
+          | macOS (Intel) | `rstock-darwin-amd64` or `rstock-darwin-amd64.app.zip` |
+          | macOS (Apple Silicon) | `rstock-darwin-arm64` or `rstock-darwin-arm64.app.zip` |
 
           ### Requirements
           - **Linux:** libgtk-3, libwebkit2gtk-4.1
