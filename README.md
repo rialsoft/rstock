@@ -86,7 +86,7 @@ wails doctor
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/rstock.git
+git clone https://github.com/rialsoft/rstock.git
 cd rstock
 
 # Install frontend dependencies
