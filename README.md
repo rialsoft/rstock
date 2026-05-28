@@ -5,12 +5,12 @@ rstock is a desktop application for monitoring stocks across 28+ world markets. 
 
 Inspired by [JStock](https://github.com/yccheok/jstock).
 
+![License](https://img.shields.io/badge/license-MIT-blue)
+![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
+
 <div align="center">
 <img src="assets/banner.webp" alt="rstock" width="512">
 </div>
-
-![License](https://img.shields.io/badge/license-MIT-blue)
-![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
 
 ## Features
 
