@@ -23,7 +23,7 @@ jobs:
           - os: windows-latest
             platform: windows/amd64
             output: rstock-windows-amd64.exe
-          - os: macos-13
+          - os: macos-latest
             platform: darwin/amd64
             output: rstock-darwin-amd64
           - os: macos-latest
@@ -188,8 +188,8 @@ jobs:
           |----------|------|
           | Linux (amd64) | `rstock-linux-amd64` |
           | Windows (amd64) | `rstock-windows-amd64.exe` |
-          | macOS (Intel) | `rstock-darwin-amd64` or `rstock-darwin-amd64.app.zip` |
-          | macOS (Apple Silicon) | `rstock-darwin-arm64` or `rstock-darwin-arm64.app.zip` |
+          | macOS (Intel) | `rstock-darwin-amd64.app.zip` |
+          | macOS (Apple Silicon) | `rstock-darwin-arm64.app.zip` |
 
           ### Requirements
           - **Linux:** libgtk-3, libwebkit2gtk-4.1
