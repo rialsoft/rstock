@@ -50,6 +50,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - One-shot trigger (auto-disables after trigger)
 
 ### Fixed
+- Exchange selector shows wrong exchange on first load → `loadExchanges()` reads localStorage first, `ExchangeSelector` follows `activeExchange` reactively
+- Watchlist empty on startup → `watch()` on `activeExchangeId` auto-reloads stocks when exchange changes
+- Exchange selector label too generic → show ISO Alpha-2 country code: "JKSE (ID)", "NYSE (US)"
 - Yahoo Finance 429 rate limiting → added Mozilla User-Agent header
 - Yahoo SearchSymbol deprecated endpoint → switched to query2 + URL encoding
 - Yahoo price history `null` values for current day → filter `Close <= 0`
